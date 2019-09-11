@@ -49,7 +49,8 @@ msigdb_load <- function(version = NULL, cache = TRUE) {
 msigdb_retrieve <- function(species, collections = NULL,
                             id_type = c("ensembl", "entrez", "symbol"),
                             version = NULL, slim = TRUE,
-                            min_ortho_sources = 2, cache = TRUE, ...) {
+                            allow_multimap = TRUE, min_ortho_sources = 2,
+                            cache = TRUE, ...) {
   id_type <- match.arg(id_type)
   sinfo <- species_lookup(species)
   all.colls <- c("H", paste0("C", 1:7))
@@ -82,18 +83,23 @@ msigdb_retrieve <- function(species, collections = NULL,
       fid.col <- "human_entrez_symbol"
       sym.col <- "human_entrez_id"
     }
-    out <- rename(db.all, featureId = fid.col, symbol = sym.col)
-    out <- select(out, collection, name, featureId, symbol, subcategory,
-                  everything())
-    out <- distinct(out, collection, name, featureId, .keep_all = TRUE)
+    out <- db.all %>%
+      rename(featureId = fid.col, symbol = sym.col) %>%
+      select(collection, name, featureId, symbol, subcategory, everything()) %>%
+      filter(nchar(featureId) > 0, !is.na(featureId), featureId != "-") %>%
+      distinct(collection, name, featureId, .keep_all = TRUE)
     if (slim) {
       out <- select(out, collection:subcategory)
     }
   } else {
-    out <- .msigdb_map_ortho(db.all, id_type, sinfo, slim, min_ortho_sources)
+    out <- .msigdb_map_ortho(db.all, id_type, sinfo, slim,
+                             allow_multimap, min_ortho_sources)
   }
 
-  mutate(out, subcategory = ifelse(nchar(subcategory) == 0, NA, subcategory))
+  out <- out %>%
+    mutate(subcategory = ifelse(nchar(subcategory) == 0, NA, subcategory))
+  attr(out, "species_info") <- sinfo
+  out
 }
 
 #' This function will return the db.all data.frame with a featureId
@@ -105,12 +111,21 @@ msigdb_retrieve <- function(species, collections = NULL,
 #' mappings.
 #'
 #' @noRd
+#' @param allow_multimap Orthologos mapping of a gene from human to whatever
+#'   can result in multiple genes. If you want to allow 1:many mapping, leave
+#'   this unchaged (`TRUE`), otherwise set to `FALSE` to only include one
+#'   mapping. The map was already filtered to only include those with the
+#'   highest number of database support, but this can still be more than one.
 #' @param min_ortho_sources Filter the hcop table on `num_sources` column to
 #'   ensure a minimum number of databases that support the ortholog map
 .msigdb_map_ortho <- function(db.all, id_type, sinfo, slim,
+                              allow_multimap = TRUE,
                               min_ortho_sources = 2) {
   hcop.all <- filter(hcop(), num_sources >= min_ortho_sources)
   hcop. <- filter(hcop.all, species_id == sinfo[["species_id"]])
+  if (!allow_multimap) {
+    hcop. <- distinct(hcop., human_entrez_gene, .keep_all = TRUE)
+  }
   out <- inner_join(db.all, hcop.,
                     by = c("human_entrez_id" = "human_entrez_gene"))
 
@@ -125,10 +140,13 @@ msigdb_retrieve <- function(species, collections = NULL,
     sym.col <- "entrez_gene"
   }
 
-  out <- rename(out, featureId = fid.col, symbol = sym.col)
-  out <- transmute(out, collection, name, featureId, symbol, subcategory,
-                   num_sources, human_ensembl_id,
-                   human_symbol = human_entrez_symbol)
+  out <- out %>%
+    rename(featureId = fid.col, symbol = sym.col) %>%
+    filter(nchar(featureId) > 0, !is.na(featureId), featureId != "-") %>%
+    transmute(collection, name, featureId, symbol, subcategory,
+              num_sources, human_ensembl_id,
+              human_symbol = human_entrez_symbol)
+
   if (slim) {
     out <- select(out, collection:num_sources)
   }

@@ -83,11 +83,13 @@ generate_hcop_orthologs <- function(hcop_txt_url = NULL) {
     species_tbl,
     msigdbr_orthologs, by = "species_id")
 
-  # For each gene, only keep the best ortholog (found in the most databases)
+  # Keep all of the mappings from the "top tier" mapping, ie. the ortholog
+  # mapping that is supported by the most databases
   orthologs =
     msigdbr_orthologs %>%
     dplyr::group_by(human_entrez_gene, species_name) %>%
-    dplyr::top_n(1, num_sources) %>%
+    dplyr::filter(num_sources == max(num_sources)) %>%
+    # dplyr::top_n(1, num_sources) %>%
     dplyr::ungroup() %>%
     dplyr::mutate(human_entrez_gene = as.character(human_entrez_gene),
            entrez_gene = as.character(entrez_gene),

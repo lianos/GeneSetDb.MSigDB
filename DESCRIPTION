@@ -12,6 +12,7 @@ Imports:
     data.table,
     stringr
 Suggests:
+    biomaRt,
     dplyr,
     msigdbr,
     multiGSEA,
