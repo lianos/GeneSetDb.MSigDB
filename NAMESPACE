@@ -3,5 +3,6 @@
 export(msigdb_retrieve)
 export(msigdb_versions)
 export(species_info)
+export(species_lookup)
 import(checkmate)
 import(dplyr)

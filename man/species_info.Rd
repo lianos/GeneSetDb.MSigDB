@@ -2,10 +2,17 @@
 % Please edit documentation in R/species_info.R
 \name{species_info}
 \alias{species_info}
-\title{Species information}
+\title{Species information table and lookup}
 \usage{
-species_info(hcop_only = TRUE)
+species_info(hcop_only = FALSE)
 }
 \description{
-Species information
+\code{species_info()} returns a table of ncbi species id's, names, common name,
+etc. \code{species_lookup()} performs fuzzy matches against the table to return
+the species-level info for a query. The fuzzy match must start left-to-right.
+}
+\examples{
+species_lookup("human")
+species_lookup("scer")
+species_lookup("hsapiens")
 }

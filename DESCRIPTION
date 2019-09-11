@@ -3,8 +3,7 @@ Type: Package
 Title: Data package for species specific versions MSigDB GeneSetDb objects
 Version: 0.99.0
 Authors@R: c(
-    person("Steve", "Lianoglou", , "slianoglou@gmail.com", c("aut", "cre")),
-    person("Denali Therapeutics", role = c("cph", "fnd"), comment = "2019"))
+    person("Steve", "Lianoglou", , "slianoglou@gmail.com", c("aut", "cre")))
 Description: Provides implementation for multiGSEA::getMSigGeneSetDb to return
     human, mouse, fly, c elegans, rat, yeast, and zebrafish versions of a 
     GeneSetDb, using ensembl, entrez, or gene symbols as the feature ids.

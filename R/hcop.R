@@ -1,3 +1,15 @@
+.HCOP <- NULL
+
+
+#' Retrieves the hcop ortholog map data.frame
+#'
+hcop <- function() {
+  if (is.null(.HCOP)) {
+    hfn <- system.file("extdata", "hcop.rds", package = "GeneSetDb.MSigDB")
+    .HCOP <<- readRDS(hfn)
+  }
+  .HCOP
+}
 
 #' Retrieves and parses the latest HCOP data
 #'
@@ -52,7 +64,9 @@ generate_hcop_orthologs <- function(hcop_txt_url = NULL) {
     )
 
   # Names and IDs of common species
-  species_tbl <- filter(species_info(hcops_only = FALSE), common_name != "human")
+  species_tbl <- species_info(hcop_only = FALSE) %>%
+    filter(common_name != "human") %>%
+    select(species_id, species_name)
 
   # Add species names
   msigdbr_orthologs = dplyr::inner_join(

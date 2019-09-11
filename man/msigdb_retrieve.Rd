@@ -15,6 +15,11 @@ in GeneSetDb.MSigDB:::.species_tbl()[\link{"common_name}] (+ "human")}
 
 \item{id_type}{"ensembl", "entrez", or "symbol"}
 }
+\value{
+a geneset data.frame with the msigdb collecitons mapped to the given
+species. This result can be passed into \code{multiGSEA::GeneSetDb()} to get
+gene set mojo started.
+}
 \description{
 Retrieves a msgidb collection data.frame for the given species
 }
