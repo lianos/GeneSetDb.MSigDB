@@ -14,7 +14,7 @@
 #' @return The full data.frame of gene set collections for the give version.
 #'   The version is added as a `msigdb_version` attribute to the returned
 #'   result.
-msigdb_load <- function(version = NULL) {
+msigdb_load <- function(version = NULL, cache = TRUE) {
   msig.info <- head(msigdb_versions(), 1)
 
   if (!is.null(version)) {
@@ -22,12 +22,15 @@ msigdb_load <- function(version = NULL) {
   }
   # TODO: hack logic in here to support version selection
   version. <- msig.info$version
-  if (is.null(.MSIG[[version.]])) {
+  mdb <- .MSIG[[version.]]
+  if (is.null(mdb)) {
     mdb <- readRDS(msig.info$path)
     attr(mdb, "msigdb_version") <- version.
-    .MSIG[[version.]] <<- mdb
+    if (cache) {
+      .MSIG[[version.]] <<- mdb
+    }
   }
-  .MSIG[[version.]]
+  mdb
 }
 
 #' Retrieves a msgidb collection data.frame for the given species
@@ -46,7 +49,7 @@ msigdb_load <- function(version = NULL) {
 msigdb_retrieve <- function(species, collections = NULL,
                             id_type = c("ensembl", "entrez", "symbol"),
                             version = NULL, slim = TRUE,
-                            min_ortho_sources = 2, ...) {
+                            min_ortho_sources = 2, cache = TRUE, ...) {
   id_type <- match.arg(id_type)
   sinfo <- species_lookup(species)
   all.colls <- c("H", paste0("C", 1:7))
@@ -59,7 +62,7 @@ msigdb_retrieve <- function(species, collections = NULL,
             immediate. = TRUE)
   }
 
-  db.all <- msigdb_load(version = version)
+  db.all <- msigdb_load(version = version, cache = cache)
   db.all <- rename(db.all, name = "gs_name", collection = "gs_cat",
                    subcategory = "gs_subcat", msigdb_id = "gs_id")
   db.all <- filter(db.all, collection %in% collections)

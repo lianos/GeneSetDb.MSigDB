@@ -3,14 +3,24 @@
 
 #' Retrieves the hcop ortholog map data.frame
 #'
-hcop <- function() {
-  if (is.null(.HCOP)) {
+#' @noRd
+#' @export
+#' @param cache If `TRUE` (default), will store the data.frame internally so
+#'   that it doesn't have to be re-read the next time the function is called
+#' @return a data.frame with human to species ortholog mapping info
+hcop <- function(cache = TRUE) {
+  out <- .HCOP
+  if (is.null(out)) {
     hfn <- system.file("extdata", "hcop.rds", package = "GeneSetDb.MSigDB")
-    .HCOP <<- readRDS(hfn)
+    out <- readRDS(hfn)
+    if (cache) {
+      .HCOP <<- out
+    }
   }
-  .HCOP
+  out
 }
 
+#
 #' Retrieves and parses the latest HCOP data
 #'
 #' HCOPS is the HGNC Comparison of Orthology Predictions.

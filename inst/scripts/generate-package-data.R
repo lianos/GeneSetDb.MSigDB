@@ -37,11 +37,11 @@ sids.fn <- file.path(dat.dir, "hcop_species.csv")
 # Retrieve and save updated HCOPS file for ortholog mapping
 
 hcop.all <- GeneSetDb.MSigDB:::generate_hcop_orthologs(hcop.txt.fn)
-hcop.rfds.fn <- file.path(dat.dir, "hcop.rds")
+hcop.rds.fn <- file.path(dat.dir, "hcop.rds")
 
 # 4mb as of 2019-09-10
 # takes ~ 0.45s to load via readRDS
-saveRDS(hcop.all, hcop.rfds.fn)
+saveRDS(hcop.all, hcop.rds.fn)
 sids <- distinct(hcop.all, species_id, species_name)
 
 # Let's save the species_id's that are in hcop. This is used in the
