@@ -1,6 +1,3 @@
-.HCOP <- NULL
-
-
 #' Retrieves the hcop ortholog map data.frame
 #'
 #' @noRd
@@ -9,12 +6,12 @@
 #'   that it doesn't have to be re-read the next time the function is called
 #' @return a data.frame with human to species ortholog mapping info
 hcop <- function(cache = TRUE) {
-  out <- .HCOP
+  out <- .CACHE$hcop
   if (is.null(out)) {
     hfn <- system.file("extdata", "hcop.rds", package = "GeneSetDb.MSigDB")
     out <- readRDS(hfn)
     if (cache) {
-      .HCOP <<- out
+      assign("hcop", out, envir = .CACHE)
     }
   }
   out

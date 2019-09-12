@@ -22,12 +22,14 @@ msigdb_load <- function(version = NULL, cache = TRUE) {
   }
   # TODO: hack logic in here to support version selection
   version. <- msig.info$version
-  mdb <- .MSIG[[version.]]
+  mdb <- .CACHE[["msigdb"]][[version.]]
   if (is.null(mdb)) {
     mdb <- readRDS(msig.info$path)
     attr(mdb, "msigdb_version") <- version.
     if (cache) {
-      .MSIG[[version.]] <<- mdb
+      mcache <- .CACHE[["msigdb"]]
+      mcache[[version.]] <- mdb
+      assign("msigdb", mcache, envir = .CACHE)
     }
   }
   mdb
@@ -64,6 +66,7 @@ msigdb_retrieve <- function(species, collections = NULL,
   }
 
   db.all <- msigdb_load(version = version, cache = cache)
+  mversion <- attr(db.all, "msigdb_version")
   db.all <- rename(db.all, name = "gs_name", collection = "gs_cat",
                    subcategory = "gs_subcat", msigdb_id = "gs_id")
   db.all <- filter(db.all, collection %in% collections)
@@ -99,6 +102,7 @@ msigdb_retrieve <- function(species, collections = NULL,
   out <- out %>%
     mutate(subcategory = ifelse(nchar(subcategory) == 0, NA, subcategory))
   attr(out, "species_info") <- sinfo
+  attr(out, "msigdb_version") <- mversion
   out
 }
 
