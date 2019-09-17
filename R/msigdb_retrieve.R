@@ -1,65 +1,52 @@
 .MSIG <- list()
 
-#' Loads the reference msigdb collection data.frame
-#'
-#' These are all-human identifiers.
-#'
-#' Info for v7: http://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/MSigDB_v7.0_Release_Notes
-#'
-#' @export
-#' @param version Specifies the version of the database to load. If `NULL`
-#'   (the default), the latest version is retrieved. To see what other versions
-#'   are available, refer to the `version` column in the [msigdb_versions()]
-#'   data.frame
-#' @return The full data.frame of gene set collections for the give version.
-#'   The version is added as a `msigdb_version` attribute to the returned
-#'   result.
-msigdb_load <- function(version = NULL, cache = TRUE) {
-  msig.info <- head(msigdb_versions(), 1)
-
-  if (!is.null(version)) {
-    warning("Skipping version for now, always pulling in latest")
-  }
-  # TODO: hack logic in here to support version selection
-  version. <- msig.info$version
-  mdb <- .CACHE[["msigdb"]][[version.]]
-  if (is.null(mdb)) {
-    mdb <- readRDS(msig.info$path)
-    attr(mdb, "msigdb_version") <- version.
-    if (cache) {
-      mcache <- .CACHE[["msigdb"]]
-      mcache[[version.]] <- mdb
-      assign("msigdb", mcache, envir = .CACHE)
-    }
-  }
-  mdb
-}
-
 #' Retrieves a msgidb collection data.frame for the given species
 #'
+#' This function retrieves arbitrary subset of the MSigDB collections, which are
+#' determined by the values passed into `collections`. This parameter is
+#' a character vector that can be any of the collections themselves (ie.
+#' "H", C1:C7).
+#'
+#' The C2 collection includes subets of curated databases in it, such as
+#' biocarta, kegg, pid, and reactome. You can also use these identifiers in the
+#' `collections` parameter if you don't want to retrieve all of C2. When the
+#' `promote_subcategory_to_collection` is `TRUE`, these databases will be pulled
+#' out of the C2 collection, and promoted to their own collections, themselves.
+#' The C5/GO annotations will also be split up into three collecionts, GO_MF,
+#' GO_CC, GO_BP.
+#'
 #' @export
+#' @param collections character of MSigDb collections ("h", "c1", ..., "c7")
 #' @param species the name of the species (human, mouse, etc.) see entries
 #'   in GeneSetDb.MSigDB:::.species_tbl()[["common_name]] (+ "human")
-#' @param collections character of MSigDb collections ("h", "c1", ..., "c7")
 #' @param id_type "ensembl", "entrez", or "symbol"
 #' @param version if `NULL` (default), the latest will be returned.
 #' @param min_ortho_sources Filter the hcop table on `num_sources` column to
 #'   ensure a minimum number of databases that support the ortholog map
+#' @param promote_subcategory_to_collection When `TRUE` (default is `FALSE`),
+#'   the database collections in C2 (like reactome, biocarta) will be pulled out
+#'   of the c2 collection and promoted to their own (ie. there will be
+#'   "reactome_c2" collection).
 #' @return a geneset data.frame with the msigdb collecitons mapped to the given
 #'   species. This result can be passed into `multiGSEA::GeneSetDb()` to get
 #'   gene set mojo started.
-msigdb_retrieve <- function(species, collections = NULL,
+msigdb_retrieve <- function(collections = "H", species = "human",
                             id_type = c("ensembl", "entrez", "symbol"),
                             version = NULL, slim = TRUE,
                             allow_multimap = TRUE, min_ortho_sources = 2,
+                            promote_subcategory_to_collection = FALSE,
                             cache = TRUE, ...) {
-  id_type <- match.arg(id_type)
-  sinfo <- species_lookup(species)
-  all.colls <- c("H", paste0("C", 1:7))
   if (is.null(collections)) {
-    collections <- all.colls
+    collections <- c("H", paste0("C", 1:7))
   }
-  collections <- unique(assert_subset(toupper(collections), all.colls))
+  sinfo <- species_lookup(species)
+  id_type <- match.arg(id_type)
+
+  all.colls <- c("H", paste0("C", 1:7))
+  all.dbs <- c("BIOCARTA", "KEGG", "PID", "REACTOME")
+  collections <- assert_subset(toupper(collections), c(all.colls, all.dbs))
+  collections <- unique(collections)
+
   if (sinfo$common_name != "human" && "c1" %in% collections) {
     warning("The C1 collection doesn't make sense for anything but human, ...",
             immediate. = TRUE)
@@ -69,7 +56,12 @@ msigdb_retrieve <- function(species, collections = NULL,
   mversion <- attr(db.all, "msigdb_version")
   db.all <- rename(db.all, name = "gs_name", collection = "gs_cat",
                    subcategory = "gs_subcat", msigdb_id = "gs_id")
-  db.all <- filter(db.all, collection %in% collections)
+
+  colls <- intersect(collections, all.colls)
+  cdbs <- intersect(collections, all.dbs)
+
+  db.all <- db.all %>%
+    filter(collection %in% colls | subcategory %in% paste0("CP:", cdbs))
 
   gene.cols <- c("human_entrez_symbol", "human_entrez_id",
                  "human_ensembl_id", "human_ensembl_symbol")
@@ -101,6 +93,32 @@ msigdb_retrieve <- function(species, collections = NULL,
 
   out <- out %>%
     mutate(subcategory = ifelse(nchar(subcategory) == 0, NA, subcategory))
+
+  if (promote_subcategory_to_collection) {
+    # we aren't doing all of them!
+    cp <- paste0("CP:", cdbs)
+    go <- c("BP", "CC", "MF")
+    cp.df <- filter(out, subcategory %in% cp)
+    go.df <- filter(out, subcategory %in% go)
+
+    rest <- out
+    if (nrow(cp.df)) {
+      rest <- anti_join(rest, cp.df, by = c("collection", "name"))
+      cp.df <- cp.df %>%
+        mutate(collection = sub("CP:", "", subcategory),
+               name = sub("^.*?_" ,"", name),
+               subcategory = "C2")
+    }
+    if (nrow(go.df)) {
+      rest <- anti_join(rest, go.df, by = c("collection", "name"))
+      go.df <- go.df %>%
+        mutate(collection = paste0("GO_", subcategory),
+               name = sub("^GO_" , "", name),
+               subcategory = "C5")
+    }
+    out <- bind_rows(rest, cp.df, go.df)
+  }
+
   attr(out, "species_info") <- sinfo
   attr(out, "msigdb_version") <- mversion
   out
@@ -157,4 +175,39 @@ msigdb_retrieve <- function(species, collections = NULL,
 
   out <- arrange(out, collection, name, featureId, desc(num_sources))
   distinct(out, collection, name, featureId, .keep_all = TRUE)
+}
+
+#' Loads the reference msigdb collection data.frame
+#'
+#' These are all-human identifiers.
+#'
+#' Info for v7: http://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/MSigDB_v7.0_Release_Notes
+#'
+#' @export
+#' @param version Specifies the version of the database to load. If `NULL`
+#'   (the default), the latest version is retrieved. To see what other versions
+#'   are available, refer to the `version` column in the [msigdb_versions()]
+#'   data.frame
+#' @return The full data.frame of gene set collections for the give version.
+#'   The version is added as a `msigdb_version` attribute to the returned
+#'   result.
+msigdb_load <- function(version = NULL, cache = TRUE) {
+  msig.info <- head(msigdb_versions(), 1)
+
+  if (!is.null(version)) {
+    warning("Skipping version for now, always pulling in latest")
+  }
+  # TODO: hack logic in here to support version selection
+  version. <- msig.info$version
+  mdb <- .CACHE[["msigdb"]][[version.]]
+  if (is.null(mdb)) {
+    mdb <- readRDS(msig.info$path)
+    attr(mdb, "msigdb_version") <- version.
+    if (cache) {
+      mcache <- .CACHE[["msigdb"]]
+      mcache[[version.]] <- mdb
+      assign("msigdb", mcache, envir = .CACHE)
+    }
+  }
+  mdb
 }
