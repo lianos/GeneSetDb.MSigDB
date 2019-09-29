@@ -1,7 +1,13 @@
 #' Retrieves the hcop ortholog map data.frame
 #'
-#' @noRd
+#' This is the data.frame that is used to map the collection data from its
+#' source/raw input (human, entrez), to ensembl or other species.
+#'
+#' HCOPS is the HGNC Comparison of Orthology Predictions.
+#'
 #' @export
+#' @seealso https://www.genenames.org/help/hcop/
+#'
 #' @param cache If `TRUE` (default), will store the data.frame internally so
 #'   that it doesn't have to be re-read the next time the function is called
 #' @return a data.frame with human to species ortholog mapping info
@@ -17,7 +23,7 @@ hcop <- function(cache = TRUE) {
   out
 }
 
-#
+
 #' Retrieves and parses the latest HCOP data
 #'
 #' HCOPS is the HGNC Comparison of Orthology Predictions.

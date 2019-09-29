@@ -2,9 +2,19 @@
 % Please edit documentation in R/species_info.R
 \name{species_info}
 \alias{species_info}
+\alias{species_lookup}
 \title{Species information table and lookup}
 \usage{
 species_info(hcop_only = FALSE)
+
+species_lookup(query, stable = species_info(FALSE), ignore.case = TRUE)
+}
+\arguments{
+\item{hcop_only}{Only retrun species information for organisms that are
+in the \code{\link[=hcop]{hcop()}} database.}
+}
+\value{
+A single-row tibble with (numeric) species id, name, etc.
 }
 \description{
 \code{species_info()} returns a table of ncbi species id's, names, common name,

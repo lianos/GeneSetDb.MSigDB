@@ -10,10 +10,11 @@ Description: Provides implementation for multiGSEA::getMSigGeneSetDb to return
 Imports:
     checkmate,
     data.table,
+    dplyr,
     stringr
 Suggests:
     biomaRt,
-    dplyr,
+    knitr,
     msigdbr,
     multiGSEA,
     testthat
@@ -21,9 +22,8 @@ Remotes:
     lianos/multiGSEA@develop
 biocViews: DifferentialExpression, GeneExpression, GeneSetEnrichment, Pathways
 VignetteBuilder: knitr
-License: Apache 2
+License: Apache License (>= 2.0)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
 Roxygen: list(markdown = TRUE)
-

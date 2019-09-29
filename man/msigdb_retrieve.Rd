@@ -4,16 +4,35 @@
 \alias{msigdb_retrieve}
 \title{Retrieves a msgidb collection data.frame for the given species}
 \usage{
-msigdb_retrieve(species, collections = NULL, id_type = c("ensembl",
-  "entrez", "symbol"))
+msigdb_retrieve(collections = "H", species = "human",
+  id_type = c("ensembl", "entrez", "symbol"), version = NULL,
+  slim = TRUE, allow_multimap = TRUE, min_ortho_sources = 2,
+  promote_subcategory_to_collection = FALSE, cache = TRUE, ...)
 }
 \arguments{
+\item{collections}{character of MSigDb collections ("h", "c1", ..., "c7")}
+
 \item{species}{the name of the species (human, mouse, etc.) see entries
 in GeneSetDb.MSigDB:::.species_tbl()[\link{"common_name}] (+ "human")}
 
-\item{collections}{character of MSigDb collections ("h", "c1", ..., "c7")}
-
 \item{id_type}{"ensembl", "entrez", or "symbol"}
+
+\item{version}{if \code{NULL} (default), the latest will be returned.}
+
+\item{allow_multimap}{If \code{TRUE} (default), multiple entries are returned
+for a single gene in the original dataset, in the event that a single
+human,entrez identifier maps to more than one ensembl identifier.}
+
+\item{min_ortho_sources}{The minimum number of databases that need to support
+the ortholog mapping. This number is provided by the \code{\link[=hcop]{hcop()}} database.}
+
+\item{promote_subcategory_to_collection}{When \code{TRUE} (default is \code{FALSE}),
+the database collections in C2 (like reactome, biocarta) will be pulled out
+of the c2 collection and promoted to their own (ie. there will be
+"reactome_c2" collection).}
+
+\item{min_ortho_sources}{Filter the hcop table on \code{num_sources} column to
+ensure a minimum number of databases that support the ortholog map}
 }
 \value{
 a geneset data.frame with the msigdb collecitons mapped to the given
@@ -21,5 +40,17 @@ species. This result can be passed into \code{multiGSEA::GeneSetDb()} to get
 gene set mojo started.
 }
 \description{
-Retrieves a msgidb collection data.frame for the given species
+This function retrieves arbitrary subset of the MSigDB collections, which are
+determined by the values passed into \code{collections}. This parameter is
+a character vector that can be any of the collections themselves (ie.
+"H", C1:C7).
+}
+\details{
+The C2 collection includes subets of curated databases in it, such as
+biocarta, kegg, pid, and reactome. You can also use these identifiers in the
+\code{collections} parameter if you don't want to retrieve all of C2. When the
+\code{promote_subcategory_to_collection} is \code{TRUE}, these databases will be pulled
+out of the C2 collection, and promoted to their own collections, themselves.
+The C5/GO annotations will also be split up into three collecionts, GO_MF,
+GO_CC, GO_BP.
 }

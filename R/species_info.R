@@ -5,6 +5,9 @@
 #' the species-level info for a query. The fuzzy match must start left-to-right.
 #'
 #' @export
+#' @param hcop_only Only retrun species information for organisms that are
+#'   in the [hcop()] database.
+#' @return A single-row tibble with (numeric) species id, name, etc.
 #' @examples
 #' species_lookup("human")
 #' species_lookup("scer")
@@ -35,7 +38,6 @@ species_info <- function(hcop_only = FALSE) {
   out
 }
 
-#' @noRd
 #' @export
 #' @rdname species_info
 species_lookup <- function(query, stable = species_info(FALSE),

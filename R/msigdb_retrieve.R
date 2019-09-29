@@ -21,6 +21,11 @@
 #'   in GeneSetDb.MSigDB:::.species_tbl()[["common_name]] (+ "human")
 #' @param id_type "ensembl", "entrez", or "symbol"
 #' @param version if `NULL` (default), the latest will be returned.
+#' @param allow_multimap If `TRUE` (default), multiple entries are returned
+#'   for a single gene in the original dataset, in the event that a single
+#'   human,entrez identifier maps to more than one ensembl identifier.
+#' @param min_ortho_sources The minimum number of databases that need to support
+#'   the ortholog mapping. This number is provided by the [hcop()] database.
 #' @param min_ortho_sources Filter the hcop table on `num_sources` column to
 #'   ensure a minimum number of databases that support the ortholog map
 #' @param promote_subcategory_to_collection When `TRUE` (default is `FALSE`),
