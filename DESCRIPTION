@@ -1,7 +1,7 @@
 Package: GeneSetDb.MSigDB
 Type: Package
 Title: Data package for species specific versions MSigDB GeneSetDb objects
-Version: 0.99.1
+Version: 0.99.2
 Authors@R: c(
     person("Steve", "Lianoglou", , "slianoglou@gmail.com", c("aut", "cre")))
 Description: Provides implementation for multiGSEA::getMSigGeneSetDb to return
