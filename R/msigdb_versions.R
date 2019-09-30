@@ -15,7 +15,7 @@ msigdb_versions <- function(dat.dir = NULL,
                             dir.pattern = "msigdb-collection_v.*rds$",
                             version.regex = "(\\d+)\\.(\\d+)\\.(\\d+)?") {
   if (is.null(dat.dir)) {
-    dat.dir <- system.file("extdata", package = "GeneSetDb.MSigDB")
+    dat.dir <- system.file("extdata", package = "msigdb.data")
   }
   assert_directory_exists(dat.dir, "r")
 

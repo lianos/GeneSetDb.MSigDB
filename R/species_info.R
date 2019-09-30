@@ -30,7 +30,7 @@ species_info <- function(hcop_only = FALSE) {
   out <- mutate(out, species_name_ = sub(" ", "_", species_name))
   if (isTRUE(hcop_only)) {
     sids.fn <- system.file("extdata", "hcop_species.csv",
-                           package = "GeneSetDb.MSigDB",
+                           package = "msigdb.data",
                            mustWork = TRUE)
     sids <- read.csv(sids.fn, colClasses = c("integer", "character"))
     out <- filter(out, species_id %in% sids[["species_id"]])

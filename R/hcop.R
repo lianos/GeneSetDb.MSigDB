@@ -14,7 +14,7 @@
 hcop <- function(cache = TRUE) {
   out <- .CACHE$hcop
   if (is.null(out)) {
-    hfn <- system.file("extdata", "hcop.rds", package = "GeneSetDb.MSigDB")
+    hfn <- system.file("extdata", "hcop.rds", package = "msigdb.data")
     out <- readRDS(hfn)
     if (cache) {
       assign("hcop", out, envir = .CACHE)

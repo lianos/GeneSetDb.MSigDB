@@ -1,25 +1,26 @@
-Package: GeneSetDb.MSigDB
+Package: msigdb.data
 Type: Package
-Title: Data package for species specific versions MSigDB GeneSetDb objects
+Title: Data package for query/retrieval of species specific MSigDB versions
 Version: 0.99.2
 Authors@R: c(
     person("Steve", "Lianoglou", , "slianoglou@gmail.com", c("aut", "cre")))
-Description: Provides implementation for multiGSEA::getMSigGeneSetDb to return
-    human, mouse, fly, c elegans, rat, yeast, and zebrafish versions of a 
-    GeneSetDb, using ensembl, entrez, or gene symbols as the feature ids.
+Description: Provides functionality to retrieve msigdb collections. Primary data
+    is provided for human entrez identifiers and is entirely provided via the
+    functionality in msigdbr. This package provides a bit more versatility
+    around identifier mapping to ensembl, and returning data to alternate
+    species. This package is here to provide functionality to multiGSEA for
+    MSigDB GeneSetDb retrieval (one might even say that it Enhances it(?)).
+Depends:
+    R (>= 3.5.0)
 Imports:
     checkmate,
-    data.table,
     dplyr,
     stringr
 Suggests:
     biomaRt,
     knitr,
     msigdbr,
-    multiGSEA,
     testthat
-Remotes: 
-    lianos/multiGSEA@develop
 biocViews: DifferentialExpression, GeneExpression, GeneSetEnrichment, Pathways
 VignetteBuilder: knitr
 License: Apache License (>= 2.0)

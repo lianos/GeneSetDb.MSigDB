@@ -82,6 +82,13 @@ test_that("ortholog mapping seems approximately correct", {
 })
 
 test_that("ortholog maps with mismatched symbol names are legit", {
+  # The randomness in our sample_n calls makes it hard to set a cutoff for the
+  # ortholog matching, ie. sometimes
+  #   mean(has.match$matched) > 0.96; and
+  #   mean(cmp$human_symbol == cmp$HGNC.symbol) > 0.95
+  # and other times they are in the low 90s
+  # Let's set a seed here to be deterministic
+  set.seed(0xDECADE)
   dfm <- msigdb_retrieve("mouse", collections = c("h", "c2"),
                          id_type = "ensembl", slim = FALSE) %>%
     distinct(human_ensembl_id, featureId, .keep_all = TRUE) %>%
@@ -111,7 +118,7 @@ test_that("ortholog maps with mismatched symbol names are legit", {
 
   cmp <- inner_join(xref, check.me, by = c("Gene.stable.ID" = "human_ensembl_id"))
   # human symbols are the same from query
-  expect_true(mean(cmp$human_symbol == cmp$HGNC.symbol) > 0.95)
+  expect_true(mean(cmp$human_symbol == cmp$HGNC.symbol) > 0.97)
 
   # for the mouse map, we'll have to group this table by human ensembl id,
   # then look within those rows to see if the biomaRt retrieved ensembl IDs
@@ -120,5 +127,5 @@ test_that("ortholog maps with mismatched symbol names are legit", {
     group_by(Gene.stable.ID) %>%
     summarize(n = n(),
               matched = length(intersect(Gene.stable.ID.1, featureId)) > 0)
-  expect_true(mean(has.match$matched) > 0.91)
+  expect_true(mean(has.match$matched) > 0.93)
 })

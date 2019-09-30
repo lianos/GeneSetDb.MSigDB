@@ -13,7 +13,7 @@ msigdb_retrieve(collections = "H", species = "human",
 \item{collections}{character of MSigDb collections ("h", "c1", ..., "c7")}
 
 \item{species}{the name of the species (human, mouse, etc.) see entries
-in GeneSetDb.MSigDB:::.species_tbl()[\link{"common_name}] (+ "human")}
+in msigdb.data:::.species_tbl()[\link{"common_name}] (+ "human")}
 
 \item{id_type}{"ensembl", "entrez", or "symbol"}
 

@@ -1,5 +1,5 @@
-library("GeneSetDb.MSigDB")
+library("msigdb.data")
 library("testthat")
 library("dplyr")
 
-test_check("GeneSetDb.MSigDB")
+test_check("msigdb.data")

@@ -18,7 +18,7 @@
 #' @export
 #' @param collections character of MSigDb collections ("h", "c1", ..., "c7")
 #' @param species the name of the species (human, mouse, etc.) see entries
-#'   in GeneSetDb.MSigDB:::.species_tbl()[["common_name]] (+ "human")
+#'   in msigdb.data:::.species_tbl()[["common_name]] (+ "human")
 #' @param id_type "ensembl", "entrez", or "symbol"
 #' @param version if `NULL` (default), the latest will be returned.
 #' @param allow_multimap If `TRUE` (default), multiple entries are returned

@@ -13,7 +13,6 @@
 library(msigdbr)
 library(multiGSEA)
 library(dplyr)
-library(data.table)
 devtools::load_all(".")
 
 # Parse and HCOP ===============================================================
@@ -37,14 +36,14 @@ if (!file.exists(hcop.txt.fn)) {
 
 msigdb.version <- packageVersion("msigdbr")
 
-dat.dir <- system.file("inst", "extdata", package = "GeneSetDb.MSigDB")
+dat.dir <- system.file("inst", "extdata", package = "msigdb.data")
 msigdb.fn <- file.path(
   dat.dir,
   sprintf("msigdb-collection_v%s.rds", msigdb.version))
 sids.fn <- file.path(dat.dir, "hcop_species.csv")
 # Retrieve and save updated HCOPS file for ortholog mapping
 
-hcop.all <- GeneSetDb.MSigDB:::generate_hcop_orthologs(hcop.txt.fn)
+hcop.all <- msigdb.data:::generate_hcop_orthologs(hcop.txt.fn)
 hcop.rds.fn <- file.path(dat.dir, "hcop.rds")
 
 # 4mb as of 2019-09-10
