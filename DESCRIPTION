@@ -1,7 +1,7 @@
 Package: msigdb.data
 Type: Package
 Title: Data package for query/retrieval of species specific MSigDB versions
-Version: 0.99.2
+Version: 0.99.3
 Authors@R: c(
     person("Steve", "Lianoglou", , "slianoglou@gmail.com", c("aut", "cre")))
 Description: Provides functionality to retrieve msigdb collections. Primary data

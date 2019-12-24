@@ -146,5 +146,34 @@ head(bigger)
 subset(hdf, gs_name == bigger$gs_name[1])
 subset(hdf.ens, gs_name == bigger$gs_name[1])
 
-saveRDS(hdf.ens, msigdb.fn)
+# Map Gene Ontology identifiers to C5 genesets, this needs the original
+# msigdb*.xml file
+msigdb_xml <- "~/workspace/data/msigdb/msigdb_v7.0.xml"
+library(xml2)
+library(dplyr)
+
+msigdb_doc <- read_xml(msigdb_xml)
+geneset_records <- xml_find_all(msigdb_doc, xpath = ".//GENESET")
+msigdbr_genesets <-
+  tibble(
+    gs_name             = xml_attr(geneset_records, attr = "STANDARD_NAME"),
+    gs_id               = xml_attr(geneset_records, attr = "SYSTEMATIC_NAME"),
+    gs_cat              = xml_attr(geneset_records, attr = "CATEGORY_CODE"),
+    geo_id              = xml_attr(geneset_records, attr = "EXACT_SOURCE"))
+
+go.info <- msigdbr_genesets %>%
+  filter(gs_cat == "C5") %>%
+  transmute(gs_name, gs_id, geo_id)
+
+# replace gs_id in C5 category with GO:XXXXXXX id
+c5.tmp <- hdf.ens %>%
+  inner_join(go.info, by = c("gs_name", "gs_id")) %>%
+  mutate(gs_id = geo_id) %>%
+  select(-geo_id)
+
+hdf.out <- hdf.ens %>%
+  filter(gs_cat != "C5") %>%
+  bind_rows(c5.tmp)
+
+saveRDS(hdf.out, msigdb.fn)
 
