@@ -1,7 +1,7 @@
 Package: msigdb.data
 Type: Package
 Title: Data package for query/retrieval of species specific MSigDB versions
-Version: 0.99.3
+Version: 0.99.4
 Authors@R: c(
     person("Steve", "Lianoglou", , "slianoglou@gmail.com", c("aut", "cre")))
 Description: Provides functionality to retrieve msigdb collections. Primary data
@@ -15,6 +15,7 @@ Depends:
 Imports:
     checkmate,
     dplyr,
+    rjson,
     stringr
 Suggests:
     biomaRt,
@@ -26,5 +27,5 @@ VignetteBuilder: knitr
 License: Apache License (>= 2.0)
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
 Roxygen: list(markdown = TRUE)

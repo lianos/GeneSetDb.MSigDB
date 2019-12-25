@@ -32,15 +32,20 @@
 #'   the database collections in C2 (like reactome, biocarta) will be pulled out
 #'   of the c2 collection and promoted to their own (ie. there will be
 #'   "reactome_c2" collection).
+#' @param go_slim Allows user to cut down the gene ontology collection (C5) to
+#'   a subset ("slims"). By default, this is set to `FALSE`, which indicates no
+#'   slimming. Setting to `TRUE` will slim down to the "generic" subsets. More
+#'   subsets, will be added in time,
+#'   http://geneontology.org/docs/download-ontology/#subsets
 #' @return a geneset data.frame with the msigdb collecitons mapped to the given
 #'   species. This result can be passed into `multiGSEA::GeneSetDb()` to get
 #'   gene set mojo started.
 msigdb_retrieve <- function(collections = "H", species = "human",
                             id_type = c("ensembl", "entrez", "symbol"),
-                            version = NULL, slim = TRUE,
+                            version = NULL, rm_meta = TRUE,
                             allow_multimap = TRUE, min_ortho_sources = 2,
                             promote_subcategory_to_collection = FALSE,
-                            cache = TRUE, ...) {
+                            go_slim = FALSE, cache = TRUE, ...) {
   if (is.null(collections)) {
     collections <- c("H", paste0("C", 1:7))
   }
@@ -88,16 +93,24 @@ msigdb_retrieve <- function(collections = "H", species = "human",
       select(collection, name, featureId, symbol, subcategory, everything()) %>%
       filter(nchar(featureId) > 0, !is.na(featureId), featureId != "-") %>%
       distinct(collection, name, featureId, .keep_all = TRUE)
-    if (slim) {
-      out <- select(out, collection:subcategory)
+    if (rm_meta) {
+      out <- select(out, collection:subcategory, gs_id = msigdb_id)
     }
   } else {
-    out <- .msigdb_map_ortho(db.all, id_type, sinfo, slim,
+    out <- .msigdb_map_ortho(db.all, id_type, sinfo, rm_meta,
                              allow_multimap, min_ortho_sources)
   }
 
   out <- out %>%
     mutate(subcategory = ifelse(nchar(subcategory) == 0, NA, subcategory))
+
+  if ("C5" %in% collections && !isFALSE(go_slim)) {
+    if (isTRUE(go_slim)) {
+      go_slim <- "generic"
+    }
+    go.ids <- slim_ids(go_slim)
+    out <- filter(out, collection != "C5" | gs_id %in% go.ids)
+  }
 
   if (promote_subcategory_to_collection) {
     # we aren't doing all of them!

@@ -8,7 +8,7 @@ test_that("human entrez and ensembl id conversion are roughly equal", {
   df.hentrez <- msigdb_retrieve("human", collections = c("h", "c2"),
                                 id_type = "entrez")
   df.hensembl <- msigdb_retrieve("human", collections = c("h", "c2"),
-                                 id_type = "ensembl", slim = FALSE)
+                                 id_type = "ensembl", rm_meta = FALSE)
   # these should be ensembl genes
   expect_true(all(grepl("ENSG\\d+$", df.hensembl$featureId)))
 
@@ -24,10 +24,10 @@ test_that("human entrez and ensembl id conversion are roughly equal", {
 
 test_that("allow_multimap = FALSE ensures (arbitrary) 1:1 ortholog mapping", {
   df.multi <- msigdb_retrieve("mouse", collections = c("h", "c2"),
-                              id_type = "ensembl", slim = FALSE)
+                              id_type = "ensembl", rm_meta = FALSE)
   df.uniq <- msigdb_retrieve("mouse", collections = c("h", "c2"),
                              id_type = "ensembl", allow_multimap = FALSE,
-                             slim = FALSE)
+                             rm_meta = FALSE)
   expect_true(nrow(df.uniq) < nrow(df.multi))
 
   # df.multi should have some map duplication
@@ -49,9 +49,9 @@ test_that("ortholog mapping seems approximately correct", {
   df.og <- msigdb_retrieve("human", collections = c("h", "c2"),
                            id_type = "ensembl")
   df.mouse <- msigdb_retrieve("mouse", collections = c("h", "c2"),
-                              id_type = "ensembl", slim = FALSE)
+                              id_type = "ensembl", rm_meta = FALSE)
   df.rat <- msigdb_retrieve("rat", collections = c("h", "c2"),
-                            id_type = "ensembl", slim = FALSE)
+                            id_type = "ensembl", rm_meta = FALSE)
 
   # ensure we have the right type of identifiers.
   expect_true(all(grepl("ENSMUSG\\d+$", df.mouse$featureId)))
@@ -90,7 +90,7 @@ test_that("ortholog maps with mismatched symbol names are legit", {
   # Let's set a seed here to be deterministic
   set.seed(0xDECADE)
   dfm <- msigdb_retrieve("mouse", collections = c("h", "c2"),
-                         id_type = "ensembl", slim = FALSE) %>%
+                         id_type = "ensembl", rm_meta = FALSE) %>%
     distinct(human_ensembl_id, featureId, .keep_all = TRUE) %>%
     select(human_ensembl_id, human_symbol, symbol, featureId)
 

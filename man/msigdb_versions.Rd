@@ -4,9 +4,11 @@
 \alias{msigdb_versions}
 \title{Returns a table of available msigdb versions within this package.}
 \usage{
-msigdb_versions(dat.dir = NULL,
+msigdb_versions(
+  dat.dir = NULL,
   dir.pattern = "msigdb-collection_v.*rds$",
-  version.regex = "(\\\\d+)\\\\.(\\\\d+)\\\\.(\\\\d+)?")
+  version.regex = "(\\\\d+)\\\\.(\\\\d+)\\\\.(\\\\d+)?"
+)
 }
 \arguments{
 \item{dat.dir}{the directory that holds the version data. By default it

@@ -4,10 +4,19 @@
 \alias{msigdb_retrieve}
 \title{Retrieves a msgidb collection data.frame for the given species}
 \usage{
-msigdb_retrieve(collections = "H", species = "human",
-  id_type = c("ensembl", "entrez", "symbol"), version = NULL,
-  slim = TRUE, allow_multimap = TRUE, min_ortho_sources = 2,
-  promote_subcategory_to_collection = FALSE, cache = TRUE, ...)
+msigdb_retrieve(
+  collections = "H",
+  species = "human",
+  id_type = c("ensembl", "entrez", "symbol"),
+  version = NULL,
+  minimal = TRUE,
+  allow_multimap = TRUE,
+  min_ortho_sources = 2,
+  promote_subcategory_to_collection = FALSE,
+  go_slim = FALSE,
+  cache = TRUE,
+  ...
+)
 }
 \arguments{
 \item{collections}{character of MSigDb collections ("h", "c1", ..., "c7")}
@@ -23,16 +32,19 @@ in msigdb.data:::.species_tbl()[\link{"common_name}] (+ "human")}
 for a single gene in the original dataset, in the event that a single
 human,entrez identifier maps to more than one ensembl identifier.}
 
-\item{min_ortho_sources}{The minimum number of databases that need to support
-the ortholog mapping. This number is provided by the \code{\link[=hcop]{hcop()}} database.}
+\item{min_ortho_sources}{Filter the hcop table on \code{num_sources} column to
+ensure a minimum number of databases that support the ortholog map}
 
 \item{promote_subcategory_to_collection}{When \code{TRUE} (default is \code{FALSE}),
 the database collections in C2 (like reactome, biocarta) will be pulled out
 of the c2 collection and promoted to their own (ie. there will be
 "reactome_c2" collection).}
 
-\item{min_ortho_sources}{Filter the hcop table on \code{num_sources} column to
-ensure a minimum number of databases that support the ortholog map}
+\item{go_slim}{Allows user to cut down the gene ontology collection (C5) to
+a subset ("slims"). By default, this is set to \code{FALSE}, which indicates no
+slimming. Setting to \code{TRUE} will slim down to the "generic" subsets. More
+subsets, will be added in time,
+http://geneontology.org/docs/download-ontology/#subsets}
 }
 \value{
 a geneset data.frame with the msigdb collecitons mapped to the given
