@@ -40,6 +40,11 @@
 #' @return a geneset data.frame with the msigdb collecitons mapped to the given
 #'   species. This result can be passed into `multiGSEA::GeneSetDb()` to get
 #'   gene set mojo started.
+#' @examples
+#' df.hentrez <- msigdb_retrieve("human", collections = c("h", "c2"),
+#'                               id_type = "entrez")
+#' df.hensembl <- msigdb_retrieve("human", collections = c("h", "c2"),
+#'                                id_type = "ensembl", rm_meta = FALSE)
 msigdb_retrieve <- function(collections = "H", species = "human",
                             id_type = c("ensembl", "entrez", "symbol"),
                             version = NULL, rm_meta = TRUE,
@@ -139,7 +144,11 @@ msigdb_retrieve <- function(collections = "H", species = "human",
 
   attr(out, "species_info") <- sinfo
   attr(out, "msigdb_version") <- mversion
-  out
+
+  # The pre-bioc multiGSEA package used featureId instead of feature_id, but
+  # I wanted to bring this more inline with facile before official public
+  # consumption
+  rename(out, feature_id = featureId)
 }
 
 #' This function will return the db.all data.frame with a featureId

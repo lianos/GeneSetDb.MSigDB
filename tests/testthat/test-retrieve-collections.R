@@ -10,7 +10,7 @@ test_that("human entrez and ensembl id conversion are roughly equal", {
   df.hensembl <- msigdb_retrieve("human", collections = c("h", "c2"),
                                  id_type = "ensembl", rm_meta = FALSE)
   # these should be ensembl genes
-  expect_true(all(grepl("ENSG\\d+$", df.hensembl$featureId)))
+  expect_true(all(grepl("ENSG\\d+$", df.hensembl$feature_id)))
 
   # we should have the same number of genesets among both collections
   og.stats <- count(df.hentrez, collection, name)
@@ -32,14 +32,14 @@ test_that("allow_multimap = FALSE ensures (arbitrary) 1:1 ortholog mapping", {
 
   # df.multi should have some map duplication
   multi.count <- df.multi %>%
-    distinct(human_symbol, featureId) %>%
+    distinct(human_symbol, feature_id) %>%
     count(human_symbol) %>%
     arrange(desc(n))
   expect_true(any(multi.count$n > 1))
 
-  # df.uniq should only have one mapped featureId per human_symbol
+  # df.uniq should only have one mapped feature_id per human_symbol
   uniq.count <- df.uniq %>%
-    distinct(human_symbol, featureId) %>%
+    distinct(human_symbol, feature_id) %>%
     count(human_symbol) %>%
     arrange(desc(n))
   expect_true(all(uniq.count$n == 1))
@@ -54,8 +54,8 @@ test_that("ortholog mapping seems approximately correct", {
                             id_type = "ensembl", rm_meta = FALSE)
 
   # ensure we have the right type of identifiers.
-  expect_true(all(grepl("ENSMUSG\\d+$", df.mouse$featureId)))
-  expect_true(all(grepl("ENSRNOG\\d+$", df.rat$featureId)))
+  expect_true(all(grepl("ENSMUSG\\d+$", df.mouse$feature_id)))
+  expect_true(all(grepl("ENSRNOG\\d+$", df.rat$feature_id)))
 
   # we should have the same number of gensets among these
   og.stats <- count(df.og, collection, name)
@@ -91,8 +91,8 @@ test_that("ortholog maps with mismatched symbol names are legit", {
   set.seed(0xDECADE)
   dfm <- msigdb_retrieve("mouse", collections = c("h", "c2"),
                          id_type = "ensembl", rm_meta = FALSE) %>%
-    distinct(human_ensembl_id, featureId, .keep_all = TRUE) %>%
-    select(human_ensembl_id, human_symbol, symbol, featureId)
+    distinct(human_ensembl_id, feature_id, .keep_all = TRUE) %>%
+    select(human_ensembl_id, human_symbol, symbol, feature_id)
 
   mismatched <- filter(dfm, tolower(dfm$symbol) != tolower(dfm$human_symbol))
   mm <- mismatched %>%
@@ -118,7 +118,7 @@ test_that("ortholog maps with mismatched symbol names are legit", {
 
   cmp <- inner_join(xref, check.me, by = c("Gene.stable.ID" = "human_ensembl_id"))
   # human symbols are the same from query
-  expect_true(mean(cmp$human_symbol == cmp$HGNC.symbol) > 0.97)
+  expect_true(mean(cmp$human_symbol == cmp$HGNC.symbol) > 0.95)
 
   # for the mouse map, we'll have to group this table by human ensembl id,
   # then look within those rows to see if the biomaRt retrieved ensembl IDs
@@ -126,6 +126,6 @@ test_that("ortholog maps with mismatched symbol names are legit", {
   has.match <- cmp %>%
     group_by(Gene.stable.ID) %>%
     summarize(n = n(),
-              matched = length(intersect(Gene.stable.ID.1, featureId)) > 0)
-  expect_true(mean(has.match$matched) > 0.93)
+              matched = length(intersect(Gene.stable.ID.1, feature_id)) > 0)
+  expect_true(mean(has.match$matched) > 0.90)
 })
