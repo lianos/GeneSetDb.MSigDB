@@ -1,10 +1,12 @@
-.slim.dir <- system.file("extdata", "go_subsets", package = "msigdb.data")
+.slim.dir <- function() {
+  system.file("extdata", "go_subsets", package = "msigdb.data")
+}
 
 #' Returns the available subsets/slims
 #'
 #' @export
 slim_available <- function() {
-  slims <- dir(.slim.dir, "json$")
+  slims <- dir(.slim.dir(), "json$")
   tibble(
     name = sub(".*?_", "", sub(".json", "", slims)),
     path = file.path(.slim.dir, slims))

@@ -22,7 +22,6 @@ Suggests:
     knitr,
     msigdbr,
     testthat
-StagedInstall: no
 biocViews: DifferentialExpression, GeneExpression, GeneSetEnrichment, Pathways
 VignetteBuilder: knitr
 License: Apache License (>= 2.0)
