@@ -98,12 +98,13 @@ msigdb_retrieve <- function(collections = "H", species = "human",
       select(collection, name, featureId, symbol, subcategory, everything()) %>%
       filter(nchar(featureId) > 0, !is.na(featureId), featureId != "-") %>%
       distinct(collection, name, featureId, .keep_all = TRUE)
-    if (rm_meta) {
-      out <- select(out, collection:subcategory, gs_id = msigdb_id)
-    }
   } else {
     out <- .msigdb_map_ortho(db.all, id_type, sinfo, rm_meta,
                              allow_multimap, min_ortho_sources)
+  }
+
+  if (rm_meta) {
+    out <- select(out, collection:subcategory, gs_id = msigdb_id)
   }
 
   out <- out %>%
@@ -192,7 +193,7 @@ msigdb_retrieve <- function(collections = "H", species = "human",
   out <- out %>%
     rename(featureId = fid.col, symbol = sym.col) %>%
     filter(nchar(featureId) > 0, !is.na(featureId), featureId != "-") %>%
-    transmute(collection, name, featureId, symbol, subcategory,
+    transmute(collection, name, featureId, symbol, msigdb_id, subcategory,
               num_sources, human_ensembl_id,
               human_symbol = human_entrez_symbol)
 
